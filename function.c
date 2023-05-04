@@ -1,81 +1,75 @@
 #include "main.h"
-
 /**
- * print_char - This prints a char
- * @types: List of arguments
+ * print_char - Prints a char
+ * @types: List a of arguments
  * @buffer: Buffer array to handle print
- * @flags:  Gets active flags
+ * @flags:  Calculates active flags
  * @width: Width
- * @precision: Get Precision
- * @size: Get Size 
+ * @precision: Precision specification
+ * @size: Size specifier
  * Return: Number of chars printed
  */
-
 int print_char(va_list types, char buffer[],
 	int flags, int width, int precision, int size)
 {
-
 	char c = va_arg(types, int);
 
 	return (handle_write_char(c, buffer, flags, width, precision, size));
 }
-
 /**
- * print_string - function to Print string
+ * print_string - Prints a string
  * @types: List a of arguments
  * @buffer: Buffer array to handle print
- * @flags: Calculates active flags
- * @width: width
- * @precision: get Precision 
- * @size: Size
+ * @flags:  Calculates active flags
+ * @width: get width.
+ * @precision: Precision specification
+ * @size: Size specifier
  * Return: Number of chars printed
  */
-
 int print_string(va_list types, char buffer[],
 	int flags, int width, int precision, int size)
 {
-	int l = 0, i;
-	char *al = va_arg(types, char *);
+	int length = 0, i;
+	char *str = va_arg(types, char *);
 
 	UNUSED(buffer);
 	UNUSED(flags);
 	UNUSED(width);
 	UNUSED(precision);
 	UNUSED(size);
-	if (al == NULL)
+	if (str == NULL)
 	{
-		al = "(null)";
+		str = "(null)";
 		if (precision >= 6)
-			al = "      ";
+			str = "      ";
 	}
 
-	while (al[l] != '\0')
-		l++;
+	while (str[length] != '\0')
+		length++;
 
-	if (precision >= 0 && precision < l)
-		l = precision;
+	if (precision >= 0 && precision < length)
+		length = precision;
 
-	if (width > l)
+	if (width > length)
 	{
 		if (flags & F_MINUS)
 		{
-			write(1, &al[0], l);
-			for (i = width - l; i > 0; i--)
+			write(1, &str[0], length);
+			for (i = width - length; i > 0; i--)
 				write(1, " ", 1);
 			return (width);
 		}
 		else
 		{
-			for (i = width - l; i > 0; i--)
+			for (i = width - length; i > 0; i--)
 				write(1, " ", 1);
-			write(1, &str[0], l);
+			write(1, &str[0], length);
 			return (width);
 		}
 	}
 
 	return (write(1, str, length));
 }
-
 /**
  * print_percent - Prints a percent sign
  * @types: Lista of arguments
@@ -86,64 +80,59 @@ int print_string(va_list types, char buffer[],
  * @size: Size specifier
  * Return: Number of chars printed
  */
-
 int print_percent(va_list types, char buffer[],
 	int flags, int width, int precision, int size)
 {
-	UNUSED(buffer);
-	UNUSED(width);
 	UNUSED(types);
+	UNUSED(buffer);
+	UNUSED(flags);
+	UNUSED(width);
 	UNUSED(precision);
 	UNUSED(size);
-	UNUSED(flags);
 	return (write(1, "%%", 1));
 }
-
 /**
- * print_int - Print integer
- * @types: List of arguments
+ * print_int - Print int
+ * @types: Lista of arguments
  * @buffer: Buffer array to handle print
- * @flags:  active flags
- * @width:  width.
- * @precision: Precision 
- * @size: Size 
+ * @flags:  Calculates active flags
+ * @width: get width.
+ * @precision: Precision specification
+ * @size: Size specifier
  * Return: Number of chars printed
  */
-
 int print_int(va_list types, char buffer[],
 	int flags, int width, int precision, int size)
 {
+	int i = BUFF_SIZE - 2;
+	int is_negative = 0;
+	long int n = va_arg(types, long int);
+	unsigned long int num;
 
-	int p = BUFF_SIZE - 2;
-	int m = 0;
-	long int l = va_arg(types, long int);
-	unsigned long int ai;
+	n = convert_size_number(n, size);
 
-	l = convert_size_number(l, size);
-
-	if (l == 0)
-		buffer[p--] = '0';
+	if (n == 0)
+		buffer[i--] = '0';
 
 	buffer[BUFF_SIZE - 1] = '\0';
-	ai = (unsigned long int)l;
+	num = (unsigned long int)n;
 
-	if (l < 0)
+	if (n < 0)
 	{
-		ai = (unsigned long int)((-1) * l);
-		m = 1;
+		num = (unsigned long int)((-1) * n);
+		is_negative = 1;
 	}
 
-	while (ai > 0)
+	while (num > 0)
 	{
-		buffer[p--] = (ai % 10) + '0';
-		ai /= 10;
+		buffer[i--] = (num % 10) + '0';
+		num /= 10;
 	}
 
-	p++;
+	i++;
 
-	return (write_number(ai, p, buffer, flags, width, precision, size));
+	return (write_number(is_negative, i, buffer, flags, width, precision, size));
 }
-
 /**
  * print_binary - Prints an unsigned number
  * @types: Lista of arguments
